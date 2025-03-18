@@ -29,30 +29,34 @@ class SeriesController extends Controller
 
     public function store(SeriesFormRequest $request)
     {
-        $serie = Series::create($request->all());
+        $serie = DB::transaction(function () use ($request) {
+            $serie = Series::create($request->all());
 
-        $seasons = [];
-        // Percorrendo a quantidade de temporadas
-        for($i = 1; $i <= $request->seasonsQty; $i++){
-            // Gerando um array multidimensional
-            $seasons[] = [
-                'series_id' => $serie->id,
-                'number' => $i,
-            ];
-        }
-        Season::insert($seasons); //Inserindo todas as series declaradas de uma vez
-
-        $episodes = [];
-        // Percorrendo a quantidade de episódios por temporada
-        foreach($serie->seasons as $season) {
-            for($j = 1; $j <= $request->episodesPerSeason; $j++){
-                $episodes[] = [
-                    'season_id' => $season->id,
-                    'number' => $j
+            $seasons = [];
+            // Percorrendo a quantidade de temporadas
+            for($i = 1; $i <= $request->seasonsQty; $i++){
+                // Gerando um array multidimensional
+                $seasons[] = [
+                    'series_id' => $serie->id,
+                    'number' => $i,
                 ];
             }
-        }
-        Episode::insert($episodes); //Inserindo todos os episódios declarados de uma vez
+            Season::insert($seasons); //Inserindo todas as series declaradas de uma vez
+
+            $episodes = [];
+            // Percorrendo a quantidade de episódios por temporada
+            foreach($serie->seasons as $season) {
+                for($j = 1; $j <= $request->episodesPerSeason; $j++){
+                    $episodes[] = [
+                        'season_id' => $season->id,
+                        'number' => $j
+                    ];
+                }
+            }
+            Episode::insert($episodes); //Inserindo todos os episódios declarados de uma vez
+
+            return $serie;
+        });
 
         return to_route('series.index')
             ->with('mensagem.sucesso', "Série '{$serie->nome}' adicionada com sucesso!"); //Redirect com flash message
