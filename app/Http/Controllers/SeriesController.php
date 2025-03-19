@@ -2,16 +2,21 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Middleware\Autenticador;
 use App\Http\Requests\SeriesFormRequest;
 use App\Models\Series;
+use App\Repositories\SeriesRepository;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 class SeriesController extends Controller
 {
+    public function __construct(private SeriesRepository $repository)
+    {
+        $this->middleware(Autenticador::class)->except(['index']);
+    }
+
     public function index(Request $request)
     {
-        // $series = Serie::query()->orderBy('nome')->get();
         $series = Series::all();
         // $series = Serie::with(['temporadas'])->get();
         $mensagemSucesso = session('mensagem.sucesso');
@@ -27,18 +32,7 @@ class SeriesController extends Controller
 
     public function store(SeriesFormRequest $request)
     {
-        $serie = Series::create($request->all());
-        for($i = 1; $i <= $request->seasonsQty; $i++){
-            $season = $serie->seasons()->create([
-                'number' => $i,
-            ]);
-
-            for($j = 1; $j <= $request->episodesPerSeason; $j++){
-                $season->episodes()->create([
-                    'number' => $j
-                ]);
-            }
-        }
+        $serie = $this->repository->add($request);
 
         return to_route('series.index')
             ->with('mensagem.sucesso', "Série '{$serie->nome}' adicionada com sucesso!"); //Redirect com flash message
