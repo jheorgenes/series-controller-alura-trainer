@@ -6,6 +6,7 @@ use App\Http\Controllers\SeasonsController;
 use App\Http\Controllers\SeriesController;
 use App\Http\Controllers\UsersController;
 use App\Http\Middleware\Autenticador;
+use App\Mail\SeriesCreated;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -38,6 +39,15 @@ Route::post('/login', [LoginController::class, 'store'])->name('signin');
 Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
 Route::get('/register', [UsersController::class, 'create'])->name('users.create');
 Route::post('/register', [UsersController::class, 'store'])->name('users.store');
+
+Route::get('/mail', function () {
+    return new SeriesCreated(
+            'Série de teste',
+            13,
+            5,
+            10
+    );
+});
 
 
 
