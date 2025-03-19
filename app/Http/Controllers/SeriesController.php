@@ -40,15 +40,20 @@ class SeriesController extends Controller
 
         $userList = User::all();
 
-        foreach ($userList as $user) {
+        foreach ($userList as $index => $user) {
             $email = new SeriesCreated(
                 $serie->nome,
                 $serie->id,
                 $request->seasonsQty,
                 $request->episodesPerSeason
             );
-            Mail::to($user)->send($email);
-            sleep(2);
+            // Mail::to($user)->send($email); //Envio de e-mail sem fila
+            // sleep(2);
+
+            // Mail::to($user)->queue($email); //Envio de e-mail com fila
+
+            $when = now()->addSeconds($index * 5); //Adicionando 5 segundos de delay para cada e-mail
+            Mail::to($user)->later($when, $email); //Envio de e-mail com fila com um delay adicionado
         }
 
         return to_route('series.index')
