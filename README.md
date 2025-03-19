@@ -35,3 +35,15 @@ $ php artisan queue:failed
 ```sh
 $ php artisan queue:retry <id-do-job>
 ```
+
+--------------------------------------------------------
+
+- Criando um Ouvinte de Evento
+```sh
+$ php artisan make:listener <nome-do-listener>
+```
+
+- Criando um Evento
+```sh
+$ php artisan make:event <nome-do-evento>
+```

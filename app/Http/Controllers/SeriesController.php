@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Middleware\Autenticador;
 use App\Http\Requests\SeriesFormRequest;
-use App\Mail\SeriesCreated;
+use App\Events\SeriesCreated as SeriesCreatedEvent;
 use App\Models\Series;
 use App\Models\User;
 use App\Repositories\SeriesRepository;
@@ -38,23 +38,13 @@ class SeriesController extends Controller
     {
         $serie = $this->repository->add($request);
 
-        $userList = User::all();
-
-        foreach ($userList as $index => $user) {
-            $email = new SeriesCreated(
-                $serie->nome,
-                $serie->id,
-                $request->seasonsQty,
-                $request->episodesPerSeason
-            );
-            // Mail::to($user)->send($email); //Envio de e-mail sem fila
-            // sleep(2);
-
-            // Mail::to($user)->queue($email); //Envio de e-mail com fila
-
-            $when = now()->addSeconds($index * 5); //Adicionando 5 segundos de delay para cada e-mail
-            Mail::to($user)->later($when, $email); //Envio de e-mail com fila com um delay adicionado
-        }
+        // Usando o Dispath pega todos os parametros definidos no construtor da classe do evento.
+        SeriesCreatedEvent::dispatch(
+            $serie->nome,
+            $serie->id,
+            $request->seasonsQty,
+            $request->episodesPerSeason,
+        );
 
         return to_route('series.index')
             ->with('mensagem.sucesso', "Série '{$serie->nome}' adicionada com sucesso!"); //Redirect com flash message
