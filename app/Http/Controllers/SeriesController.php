@@ -36,6 +36,13 @@ class SeriesController extends Controller
 
     public function store(SeriesFormRequest $request)
     {
+        $coverPath = $request
+            ->file('cover')
+            ->store('series_cover', 'public');
+
+        // Gambiarra pra adicionar o caminho da imagem ao request (OBS: Criar novo SeriesFormRequest com validação pra isso)
+        $request->coverPath = $coverPath;
+
         $serie = $this->repository->add($request);
 
         // Usando o Dispath pega todos os parametros definidos no construtor da classe do evento.
