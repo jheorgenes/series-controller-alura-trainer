@@ -52,3 +52,15 @@ $ php artisan make:event <nome-do-evento>
 ```sh
 $ php artisan make:listener <nome-do-listener> -e <nome-do-evento>
 ```
+
+- Criando um Job
+```sh
+$ php artisan make:job <nome-da-job>
+```
+--------------------------------------------------------
+
+- Pra não esquecer (quando tiver querendo acessar um upload publico)
+- Cria um link no Laravel pra conseguir acessar diretamente o arquivo.
+```sh
+$ php artisan storage:link
+```
