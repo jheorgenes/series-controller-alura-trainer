@@ -47,3 +47,8 @@ $ php artisan make:listener <nome-do-listener>
 ```sh
 $ php artisan make:event <nome-do-evento>
 ```
+
+- Criando um novo Listener (já apontando qual "Evento" ele vai ouvir)
+```sh
+$ php artisan make:listener <nome-do-listener> -e <nome-do-evento>
+```
