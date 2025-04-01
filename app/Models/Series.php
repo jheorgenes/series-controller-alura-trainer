@@ -17,6 +17,12 @@ class Series extends Model
         return $this->hasMany(Season::class, 'series_id');
     }
 
+    public function episodes()
+    {
+        // Busca todos os episódios da serie com base no relacionamento entre episódios e seasons
+        return $this->hasManyThrough(Episode::class, Season::class);
+    }
+
     // Ordenamento Global por Escopo
     protected static function booted()
     {
