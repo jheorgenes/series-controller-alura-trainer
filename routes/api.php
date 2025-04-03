@@ -3,7 +3,10 @@
 use App\Http\Controllers\Api\SeriesController;
 use App\Models\Episode;
 use App\Models\Series;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -21,22 +24,36 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::get('series', [SeriesController::class, 'index']);
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('series', [SeriesController::class, 'index']);
 
-Route::apiResource('series', SeriesController::class);
-// Buscando series e as temporadas
-Route::get('series/{series}/seasons', function (Series $series) {
-    return $series->seasons()->with('episodes')->get();
+    Route::apiResource('series', SeriesController::class);
+    // Buscando series e as temporadas
+    Route::get('series/{series}/seasons', function (Series $series) {
+        return $series->seasons()->with('episodes')->get();
+    });
+
+    // Buscando todos os episodios de uma determinada serie
+    Route::get('series/{series}/episodes', function (Series $series) {
+        return $series->episodes;
+    });
+
+    Route::patch('/episodes/{episode}', function (Episode $episode, Request $request) {
+        $episode->watched = $request->watched;
+        $episode->save();
+
+        return $episode;
+    });
+
 });
 
-// Buscando todos os episodios de uma determinada serie
-Route::get('series/{series}/episodes', function (Series $series) {
-    return $series->episodes;
-});
+Route::post('/login', function (Request $request) {
+    $credentials = $request->only('email', 'password');
+    if(!Auth::attempt($credentials)) {
+        return response()->json('Unauthorized', 401);
+    }
+    $user = Auth::user();
+    $token = $user->createToken('token');
 
-Route::patch('/episodes/{episode}', function (Episode $episode, Request $request) {
-    $episode->watched = $request->watched;
-    $episode->save();
-
-    return $episode;
+    return response()->json($token->plainTextToken);
 });
